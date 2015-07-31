@@ -1,0 +1,10 @@
+[Unit]
+Description=Internet Routing Registry daemon
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/irrd -m
+
+[Install]
+WantedBy=multi-user.target

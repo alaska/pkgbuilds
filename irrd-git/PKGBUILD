@@ -1,0 +1,59 @@
+# Maintainer: Andy Walker <walkeraj@gmail.com>
+
+pkgname=irrd-git
+pkgver=3.0.9rc2.r2.g90d1618
+pkgrel=1
+pkgdesc="A stand-alone Internet Routing Registry database server"
+arch=('i686' 'x86_64')
+url="http://irrd.net/"
+license=('BSD')
+makedepends=('git')
+depends=('perl' 'glib2')
+source=('git+https://github.com/irrdnet/irrd.git'
+        'irrd.service')
+sha256sums=('SKIP'
+            'fbadc862f54de1cf461a2ca404480db137cbfeb71f00be279657373a71c43a45')
+
+#prepare() {
+#}
+
+pkgver() {
+  cd irrd
+  git describe --long --tags | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+build() {
+  cd irrd/src
+
+  ./autogen.sh
+  ./configure --prefix=/usr
+  make
+}
+
+package() {
+  cd irrd/src
+
+  #make DESTDIR="${pkgdir}" install
+  # Binaries
+  install -Dm755 "$srcdir"/irrd/src/programs/IRRd/irrd "$pkgdir"/usr/bin/irrd
+  install -Dm755 "$srcdir"/irrd/src/programs/irr_notify/irr_notify "$pkgdir"/usr/bin/irr_notify
+  install -Dm755 "$srcdir"/irrd/src/programs/irr_rpsl_check/irr_rpsl_check "$pkgdir"/usr/bin/irr_rpsl_check
+  install -Dm755 "$srcdir"/irrd/src/programs/irr_rpsl_submit/irr_rpsl_submit "$pkgdir"/usr/bin/irr_rpsl_submit
+  install -Dm755 "$srcdir"/irrd/src/programs/irrdcacher/irrdcacher "$pkgdir"/usr/bin/irrdcacher
+  install -Dm755 "$srcdir"/irrd/src/programs/irrdcacher/ripe2rpsl "$pkgdir"/usr/bin/ripe2rpsl
+
+  # Configuration files
+  install -Dm644 "$srcdir"/irrd/samples/irrd.conf.sample "$pkgdir"/usr/share/doc/"$pkgname"/samples/irrd.conf.sample
+  install -Dm644 "$srcdir"/irrd.service "$pkgdir"/usr/lib/systemd/system/irrd.service
+
+  # Manpage
+  install -Dm644 "$srcdir"/irrd/src/programs/IRRd/irrd.8 "$pkgdir"/usr/share/man/man8/irrd.8
+
+  # Docs
+  install -Dm644 "$srcdir"/irrd/irrd-user.pdf "$pkgdir"/usr/share/doc/"$pkgname"/irrd-user.pdf
+  install -Dm644 "$srcdir"/irrd/irrd-user.sgml "$pkgdir"/usr/share/doc/"$pkgname"/irrd-user.sgml
+
+  # License
+  install -Dm644 "$srcdir"/irrd/COPYRIGHT "$pkgdir"/usr/share/licenses/"$pkgname"/COPYRIGHT
+
+}
